@@ -51,7 +51,7 @@ var ProxyData []json.RawMessage
 var proxy_list ProxyList
 
 func main() {
-	count := 3000
+	count := 2000
 	limit := fmt.Sprintf("%d", count)
 	ProxyApi += limit
 	//获取Proxy数据
@@ -68,13 +68,8 @@ func main() {
 	//proxy_array := make(map[int]string{})
 	for key, _ := range ProxyData {
 		json.Unmarshal(ProxyData[key], &proxy_list)
-		//proxy_array[key]["url"] = string(proxy_list.Url)
-		//proxy_array[key]["id"] = string(proxy_list.Id)
-		//
 
-		//fmt.Println(string(proxy_list.Url))
-		//fmt.Println(string(proxy_list.Id))
-		httpx := Newhttppool(Url, Referer_url, "GET", string(proxy_list.Url), 3)
+		httpx := Newhttppool(Url, Referer_url, "GET", string(proxy_list.Url), 10)
 
 		httpx.http_send(0)
 		//fmt.Println(i)
@@ -125,13 +120,17 @@ func (h *http_pool) http_send(is_content int) (html string) {
 		transport = getTransportFieldURL(h.ProxyUrl)
 	}
 	//设置超时时间
-	dialer := net.Dialer{
-		Timeout:  time.Duration(h.Timeout) * time.Second,
-		Deadline: time.Now().Add(time.Duration(h.Timeout) * time.Second),
+	//timeout
+	transport.Dial = func(netw, addr string) (net.Conn, error) {
+		deadline := time.Now().Add(2000 * time.Millisecond)
+		c, err := net.DialTimeout(netw, addr, time.Second)
+		if err != nil {
+			return nil, err
+		}
+		c.SetDeadline(deadline)
+		return c, nil
 	}
-	transport.Dial = func(network, address string) (net.Conn, error) {
-		return dialer.Dial(network, address)
-	}
+
 	client := &http.Client{Transport: transport}
 	req, err := http.NewRequest(h.Method, h.Url, nil)
 	if err != nil {
@@ -150,8 +149,10 @@ func (h *http_pool) http_send(is_content int) (html string) {
 		//log.Println(err.Error())
 		fmt.Println("请求失败！")
 		html = "false"
-		del_proxy(string(proxy_list.Id))
-		fmt.Println(string(proxy_list.Id))
+		if len(h.ProxyUrl) > 0 {
+			del_proxy(string(proxy_list.Id))
+			fmt.Println(string(proxy_list.Id))
+		}
 		//resq.Body.Close()
 		return
 	}
@@ -164,7 +165,7 @@ func (h *http_pool) http_send(is_content int) (html string) {
 			}
 			html = string(robots)
 		} else {
-			//execute_log(h.Headers["Host"])
+			execute_log(h.Headers["Host"])
 			html += "true\n"
 			fmt.Println(html)
 		}
