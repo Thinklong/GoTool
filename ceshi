@@ -1,5 +1,6 @@
 package main
 
+asdas
 import (
 	"bufio"
 	"bytes"
@@ -9,6 +10,7 @@ import (
 	"os"
 	"strings"
 )
+abc
 
 var (
 	pwd = flag.String("pwd", "./", "pwd")
