@@ -1,5 +1,4 @@
 package main
-
 asdas
 import (
 	"bufio"
@@ -11,6 +10,7 @@ import (
 	"strings"
 )
 abc
+
 
 var (
 	pwd = flag.String("pwd", "./", "pwd")
