@@ -1,5 +1,11 @@
 package main
+<<<<<<< HEAD
 asdas
+=======
+
+
+ceshi
+>>>>>>> FETCH_HEAD
 import (
 	"bufio"
 	"bytes"
